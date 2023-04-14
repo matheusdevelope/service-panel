@@ -7,7 +7,7 @@
     "start": "tsc && node .",
     "build:dev": "tsc -w",
     "dev": "nodemon . ",
-    "build": "yarn pkg . --compress GZip"
+    "build": "tsc && npx pkg . --compress GZip"
   },
   "bin": "dist/index.js",
   "pkg": {

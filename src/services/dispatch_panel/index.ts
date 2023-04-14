@@ -5,9 +5,7 @@ import {
   Database,
 } from "repository-data7";
 import HTTP_Server_Dispatch from "./http";
-import { resolve } from "path";
 import { EnumKeysDispatchPanel } from "../../types/params";
-import { log } from "console";
 
 let IO: Server | null = null;
 let timer: NodeJS.Timer;
@@ -110,7 +108,6 @@ function execute(params: IParams) {
       });
     });
 
-    log
     timer = setInterval(
       () =>  SendData(String(config[EnumKeysDispatchPanel.query]), DB),
       time_refresh
