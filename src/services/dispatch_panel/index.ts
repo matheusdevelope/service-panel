@@ -6,6 +6,9 @@ import {
 } from "repository-data7";
 import HTTP_Server_Dispatch from "./http";
 import { EnumKeysDispatchPanel } from "../../types/params";
+import { appendFileSync } from "fs";
+import { tmpdir } from "os";
+import path from "path";
 
 let IO: Server | null = null;
 let timer: NodeJS.Timer;
@@ -18,7 +21,28 @@ interface IMessageBox {
 function showMessageBox({ title, message }: IMessageBox) {
   console.log(title, message);
 }
+function generateFileName(base:string) {
+  const currentDate = new Date();
+  const year = currentDate.getFullYear();
+  const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+  const day = currentDate.getDate().toString().padStart(2, '0');
+  const fileName = `${base}-${year}-${month}-${day}.txt`;
+  return fileName;
+}
 
+function LogFile(data:string) {
+  try {
+    appendFileSync( path.join(tmpdir() , generateFileName('log-data7-panel')),
+    `
+    ${new Date().toLocaleDateString()} - ${new Date().toLocaleTimeString()}
+    ${data}
+    -------------------------------------------------------------------------
+
+    `)
+  } catch (error) {
+    console.log(error);
+  }
+}
 async function SendData(query: string, DB: any) {
   if (connections_count > 0) {
     try {
@@ -72,14 +96,14 @@ function execute(params: IParams) {
         : new ConnectionSqlServer(db_params);
     const DB = new Database(connectionDB);
     HTTP_Server_Dispatch().execute(server_port,()=>{
-      console.log("Server is runnig in port " + config[EnumKeysDispatchPanel.server_port]);
-      
+      console.log("Server is runnig in port " + config[EnumKeysDispatchPanel.server_port]);      
     });
     IO = new Server(HTTP_Server_Dispatch().execute(server_port), {
       cors: {
         origin: "*",
       },
     });
+    LogFile( `--- Socket Service Enabled\n`)
 
     IO.on("error", (e) => {
       showMessageBox({
@@ -90,6 +114,7 @@ function execute(params: IParams) {
     });
 
     IO.on("connection", (socket) => {
+      LogFile(`Socket Connection: \nidDevice: ${socket.handshake.query.idDevice} \nsocketId: ${socket.id}`)
       showMessageBox({
         title: "Painel de Expedição",
         message: "Painel conectado.",
@@ -100,6 +125,7 @@ function execute(params: IParams) {
         socket.emit("data_dispath_panel", ret);
       });
       socket.on("disconnect", () => {
+        LogFile(`Socket Disconnection: \nidDevice: ${socket.handshake.query.idDevice} \nsocketId: ${socket.id}`)
         if (connections_count > 0) connections_count--;
         showMessageBox({
           title: "Painel de Expedição",
@@ -114,6 +140,7 @@ function execute(params: IParams) {
     );
     return IO;
   } catch (e) {
+    LogFile(`Socket Error Execute Method:\n${String(e)}`)
     showMessageBox({
       title: "Painel de Expedição",
       message:
@@ -129,6 +156,7 @@ function stop() {
   IO?.removeAllListeners();
   IO = null;
   HTTP_Server_Dispatch().stop(() => console.log);
+  LogFile( `--- Socket Service Disabled `)
 }
 
 export default function SocketService() {
