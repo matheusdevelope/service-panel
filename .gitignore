@@ -2,3 +2,5 @@ node_modules
 package
 dist
 .env
+src_old
+coverage
