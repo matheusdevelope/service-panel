@@ -1,10 +1,10 @@
 import ExpressAdapter from "./infra/api/ExpressAdapter";
 import Router from "./infra/api/Router";
 import WebSocket from "./infra/api/WebSocket";
-import QueryInMemoryRepository from "./infra/repository/QueryInMemoryRepository";
+import PanelInMemoryRepository from "./infra/repository/PanelInMemoryRepository";
 
 const httpServer = new ExpressAdapter();
-const queryRepository = new QueryInMemoryRepository();
+const queryRepository = new PanelInMemoryRepository();
 
 const socket = new WebSocket(httpServer);
 socket.init();
