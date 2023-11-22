@@ -17,5 +17,11 @@ export default class PanelInMemoryRepository implements PanelRepository{
     async list() : Promise<Panel[]>{
         return this.panels;
     }
+    async delete(id:string): Promise<void> {
+        this.panels = this.panels.filter(panel => panel.id !== id);
+    }
+    async migrate(): Promise<void> {
+        return;
+    }
     
 }

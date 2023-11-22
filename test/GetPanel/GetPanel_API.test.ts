@@ -8,12 +8,13 @@ describe("GetPanel API", () => {
   test("should get a Panel", async () => {
     const input: PanelInput = {
       description: "Test Panel",
-      statement: "SELECT * FROM test",
+      statement: "SELECT * FROM Paineis",
       interval: 1000,
     };
     const panel_created = await axios.post(`${base_url}/panels`, input, {
       validateStatus: () => true,
     });
+
     const panel = await axios.get(
       `${base_url}/panels/${panel_created.data.id}`,
       { validateStatus: () => true }

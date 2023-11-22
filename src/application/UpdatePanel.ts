@@ -1,13 +1,13 @@
-import { randomUUID } from "crypto";
+
 import Panel from "../domain/entity/Panel";
 import PanelRepository from "../domain/repository/PanelRepository";
-export default class CreatePanel {
+
+export default class UpdatePanel {
   constructor(private panelRepository: PanelRepository) {}
 
   async execute(input: PanelInput): Promise<Panel> {
-    const id = randomUUID();
     const panel = new Panel(
-      id,
+      input.id,
       input.description,
       input.statement,
       input.interval
@@ -18,6 +18,7 @@ export default class CreatePanel {
 }
 
 export interface PanelInput {
+  id:string;
   description: string;
   statement: string;
   interval: number;

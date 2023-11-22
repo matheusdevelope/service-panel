@@ -1,42 +1,28 @@
-const io = require('socket.io-client');
+const io = require("socket.io-client");
 
-const serverUrl = 'http://localhost:3000'; // URL do seu servidor WebSocket
-
-const socket = io(serverUrl);
-
-// Manipulador para quando a conexão for estabelecida
-socket.on('connect', () => {
-  console.log('Conexão estabelecida com o servidor WebSocket.');
-  
-  // Emita um evento para ingressar em uma sala
-  socket.emit('join room', 'sala-teste');
-
-
-});
-let count = 0;
-socket.on("notification", (data) => {
-  console.log("notification", data);
-  count++;
-  if(count > 10){
-    socket.emit('leave room', 'sala-teste');
-    socket.disconnect();
-  }
-});
-// Manipulador para lidar com desconexão
-socket.on('disconnect', () => {
-  console.log('Desconectado do servidor WebSocket.');
-
+const SERVER_URL = "http://localhost:3000"; 
+const socket = io(SERVER_URL, {
+  query: {
+    room: 
+      "9cdc75af-8319-4427-a89e-f3f3bee295ba"
+    ,
+  },
 });
 
-// Realize ações de teste, como enviar mensagens
-// setTimeout(() => {
-//   socket.emit('chat message', 'Olá, servidor WebSocket!');
-// }, 5000); // Envie uma mensagem após 5 segundos
+socket.on("connect", () => {
+  console.log("Conectado ao servidor");
 
-// // Evento para sair da sala
-// setTimeout(() => {
-//   socket.emit('leave room', 'sala-teste');
-// }, 15000); // Saia da sala após 15 segundos
+  // Lógica para enviar dados para o servidor, se necessário
+  // socket.emit('data', { /* Seus dados aqui */ });
+});
 
+socket.on("data", (data) => {
+  console.log("Recebido dados do servidor:", data.rows.length);
+});
 
-console.log('Cliente WebSocket iniciado.');
+socket.on("error", (error) => {
+  console.log("Erro:", error);
+});
+socket.on("disconnect", () => {
+  console.log("Desconectado do servidor");
+});

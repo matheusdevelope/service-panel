@@ -1,13 +1,10 @@
 import Panel from "../domain/entity/Panel";
 import PanelRepository from "../domain/repository/PanelRepository";
 
-
 export default class GetPanels {
-    constructor(
-        private readonly panelRepository: PanelRepository
-    ) {}
+  constructor(private panelRepository: PanelRepository) {}
 
-    async execute(): Promise<Panel[]> {
-      return  await this.panelRepository.list();
-    }
+  async execute(): Promise<Panel[]> {
+    return await this.panelRepository.list();
+  }
 }
