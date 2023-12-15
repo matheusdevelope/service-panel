@@ -4,4 +4,5 @@ export interface Config {
     user: string 
     password: string
     database: string
+    schema?: string
 }

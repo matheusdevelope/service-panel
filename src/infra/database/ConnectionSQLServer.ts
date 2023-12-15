@@ -56,4 +56,7 @@ export default class ConnectionSQLServer implements Connection {
   async close(): Promise<void> {
     await this.pool.close();
   }
+  async connected(): Promise<boolean> {
+    return this.pool.connected;
+  }
 }

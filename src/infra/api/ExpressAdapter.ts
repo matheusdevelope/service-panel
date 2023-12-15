@@ -1,13 +1,19 @@
 import Express, { Request, Response } from "express";
 import HttpServer, { ResponseHttpServer } from "./HttpServer";
 import { Server, createServer } from "http";
+import cors from 'cors'
 
 export default class ExpressAdapter implements HttpServer {
   app: any;
-  server: Server
+  server: Server;
   constructor() {
     this.app = Express();
     this.app.use(Express.json());
+    this.app.use(
+      cors({
+        origin: "*",
+      })
+    );
     this.server = createServer(this.app);
   }
   on(

@@ -3,4 +3,5 @@ export default interface Connection{
     one(query:string, params:any[]):Promise<any>
     open():Promise<void>
     close():Promise<void>
+    connected():Promise<boolean>
 }

@@ -12,6 +12,14 @@ import PanelDatabaseRepository from "./infra/repository/PanelDatabaseRepository"
 const appConfig = new AppConfig(process.argv);
 
 const SqlServerConnection = new ConnectionSQLServer(appConfig.dbConfig);
+
+// (async () => {
+//   if (!(await SqlServerConnection.connected())) {
+//     console.log("Error connecting to database, check your parameters");
+//     process.exit(1);
+//   }
+// })();
+
 Registry.getInstance().provide("connection", SqlServerConnection);
 
 const httpServer = new ExpressAdapter();
@@ -21,14 +29,15 @@ const socket = new WebSocket(httpServer);
 socket.init();
 Registry.getInstance().provide("socket", socket);
 
-const panelRepository = new PanelDatabaseRepository(SqlServerConnection);
+const panelRepository = new PanelDatabaseRepository(SqlServerConnection, appConfig.dbConfig.schema);
 Registry.getInstance().provide("panelRepository", panelRepository);
 
 const router = new Router(httpServer, panelRepository);
 router.init();
 
 const panelsController = new PanelsController(panelRepository);
-panelsController.init();
+panelsController.start();
+
 Registry.getInstance().provide("panelsController", panelsController);
 
 httpServer.listen(appConfig.httpConfig.port, () => {

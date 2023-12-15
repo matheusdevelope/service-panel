@@ -11,13 +11,14 @@ export default class AppConfig {
 
     const requiredParams = [
       "--DB_HOST",
+      "--DB_SCHEMA",
       "--DB_NAME",
       "--DB_USER",
       "--DB_PASSWORD",
       "--DB_PORT",
       "--PORT",
     ];
-    const missingParams = requiredParams.filter((param) => !parsedArgs[param]);
+    const missingParams = requiredParams.filter((param) => param == '--DB_SCHEMA' ? false : !parsedArgs[param]);
 
     if (!isDevMode && missingParams.length > 0) {
       console.error(`Parâmetros faltando: ${missingParams.join(", ")}`);
@@ -26,6 +27,9 @@ export default class AppConfig {
 
     this.dbConfig = {
       host: isDevMode ? process.env.DB_HOST || "" : parsedArgs["--DB_HOST"],
+      schema: isDevMode
+        ? process.env.DB_SCHEMA || ""
+        : parsedArgs["--DB_SCHEMA"] || "",
       database: isDevMode
         ? process.env.DB_NAME || ""
         : parsedArgs["--DB_NAME"],

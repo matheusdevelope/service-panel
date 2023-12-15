@@ -1,37 +1,50 @@
-import EventEmitter from "events";
 import { inject } from "../DI";
 import Panel from "../domain/entity/Panel";
 import Connection from "../infra/database/Connection";
+import WebSocket from "../infra/api/WebSocket/WebSocket";
 
-export default class PanelController extends EventEmitter {
+export default class PanelController {
   interval?: NodeJS.Timer;
-
+  roomClientsCount = 0;
+  room: string;
   @inject("connection")
   private connection!: Connection;
+  @inject("socket")
+  private socket!: WebSocket;
 
   constructor(readonly panel: Panel) {
-    super();
+    this.room = panel.id;
+    this.startLoop();
   }
-  private async sendData() {
+
+  async sendData() {
+    if (this.roomClientsCount === 0) return;
     const data = await this.connection.query(this.panel.statement, []);
-    this.emit("data", data);
+    this.socket.emit("data", data, this.room);
   }
+
+  private updateRoomClientsCount() {
+    this.roomClientsCount = this.socket.clientsInRoom(this.room);
+  }
+
+  private async loopHandler() {
+    this.updateRoomClientsCount();
+    await this.sendData();
+  }
+
   startLoop() {
     this.interval = setInterval(async () => {
-      if (this.listenerCount("data") === 0) {
-        this.stopLoop();
-        return;
-      }
-      this.sendData();
+      await this.loopHandler();
     }, this.panel.interval);
-    this.sendData();
   }
-  stopLoop() {
+
+  stopLoop = () => {
     if (this.interval) {
-      clearInterval(this.interval);
+      clearInterval(this.interval as NodeJS.Timeout);
       this.interval = undefined;
     }
   }
+
   isLooping() {
     return this.interval !== undefined;
   }

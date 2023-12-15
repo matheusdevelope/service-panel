@@ -1,3 +1,4 @@
+import Column from "./Column";
 
 
 export default class Panel {
@@ -5,8 +6,8 @@ export default class Panel {
     description: string;
     statement: string;
     interval: number;
-    
-    constructor(id:string, description:string, statement:string, interval:number)
+    columns:Column[] = [];
+    constructor(id:string, description:string, statement:string, interval:number, columns:Column[] = [])
     {
         if(!id) throw new Error("Panel id is required");
         if(!description) throw new Error("Panel description is required");
@@ -16,5 +17,6 @@ export default class Panel {
         this.description = description;
         this.statement = statement;
         this.interval = interval;
+        this.columns = columns;
     }
 }

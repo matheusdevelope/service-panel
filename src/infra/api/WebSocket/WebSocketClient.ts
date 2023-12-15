@@ -1,33 +1,49 @@
 import { Socket } from "socket.io";
-import { inject } from "../../../DI";
-import {PanelsControllerInterface} from "../../../application/PanelsController";
-
+// import { inject } from "../../../DI";
+// import PanelsController from "../../../application/PanelsController";
 export default class WebSocketClient {
-  @inject("panelsController")
-  private panelsController!: PanelsControllerInterface;
+  rooms: string[] = [];
+
+  // @inject("panelsController")
+  // private panelController!: PanelsController;
 
   constructor(readonly socket: Socket) {
-    const room = socket.handshake.query.room as string;
-    this.init(room);
+    this.socket.on("join_room", this.joinRoom);
+    this.socket.on("leave_room", this.leaveRoom);
+
+    this.socket.on("disconnect", () => {
+      this.rooms.forEach((room) => {
+        this.socket.leave(room);
+      });
+    });
   }
-  init(room: string) {
-    try {
-      if (room) {
-        this.socket.join(room);
-        this.panelsController.on(room, "data", this.handler);
-        this.socket.on("disconnect", () => {
-          this.socket.leave(room);
-          this.panelsController.off(room, "data", this.handler);
-        });
-      } else {
-        this.socket.emit("error", "No room to join");
-        this.socket.disconnect();
+  joinRoom = async (rooms: string[] | string) => {
+    if (Array.isArray(rooms)) {
+      rooms.forEach((room) => {
+        this.joinRoom(room);
+      });
+    } else {
+      if (rooms && !this.rooms.includes(rooms)) {
+        this.socket.join(rooms);
+        this.socket.emit("join_room", rooms);
+        this.rooms.push(rooms);
+        // await this.panelController.panels
+        //   .find((panel) => panel.room === rooms)
+        //   ?.sendData();
       }
-    } catch (error: any) {
-      this.socket.emit("error", error.message);
     }
-  }
-  handler = (data: any) => {
-    this.socket.emit("data", data);
+  };
+  leaveRoom = (rooms: string[] | string) => {
+    if (Array.isArray(rooms)) {
+      rooms.forEach((room) => {
+        this.leaveRoom(room);
+      });
+    } else {
+      if (rooms && this.rooms.includes(rooms)) {
+        this.socket.leave(rooms);
+        this.socket.emit("leave_room", rooms);
+        this.rooms = this.rooms.filter((room) => room !== rooms);
+      }
+    }
   };
 }
